@@ -5,11 +5,31 @@ import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
-@HiltViewModel
-class ChatViewModel @Inject constructor(): ViewModel() {
-    var uiState = mutableStateListOf("")
+data class MessageUiState(
+    val content: String = "",
+    val fromMe: Boolean = true
+)
 
-    fun addContent(content: String){
-        uiState.add(content)
+@HiltViewModel
+class ChatViewModel @Inject constructor() : ViewModel() {
+    var uiState = mutableStateListOf(MessageUiState())
+
+    init {
+        initOthers()
+    }
+
+    private fun initOthers() {
+        val others = listOf(
+            MessageUiState("other", false),
+            MessageUiState("message", false)
+        )
+        others.forEach {
+            uiState.add(it)
+        }
+    }
+
+    fun addContent(content: String) {
+        val message = MessageUiState(content)
+        uiState.add(message)
     }
 }
