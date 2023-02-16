@@ -11,6 +11,7 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarDefaults
@@ -19,12 +20,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.mockchat.shared.Avatar
+import com.example.mockchat.ui.theme.Green300
+import com.example.mockchat.ui.theme.Orange200
 
 @Composable
 fun ChatScreen(viewModel: ChatViewModel = hiltViewModel()) {
@@ -47,12 +53,14 @@ fun ChatScreen(viewModel: ChatViewModel = hiltViewModel()) {
                                     Avatar(R.drawable.mock_other_avatar)
                                     Spacer(modifier = Modifier.width(5.dp))
                                     Card(
-                                        modifier = Modifier.widthIn(0.dp, 320.dp).heightIn(50.dp),
+                                        modifier = Modifier
+                                            .widthIn(0.dp, 320.dp)
+                                            .heightIn(30.dp),
                                         shape = RoundedCornerShape(16.dp)
                                     ) {
-                                        Row() {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
                                             Spacer(modifier = Modifier.width(5.dp))
-                                            Text(text = it.content, fontSize = 30.sp)
+                                            Text(text = it.content, fontSize = 18.sp)
                                             Spacer(modifier = Modifier.width(5.dp))
                                         }
                                     }
@@ -68,12 +76,15 @@ fun ChatScreen(viewModel: ChatViewModel = hiltViewModel()) {
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Card(
-                                        modifier = Modifier.widthIn(0.dp, 320.dp).heightIn(50.dp),
-                                        shape = RoundedCornerShape(16.dp)
+                                        modifier = Modifier
+                                            .widthIn(0.dp, 320.dp)
+                                            .heightIn(30.dp),
+                                        shape = RoundedCornerShape(16.dp),
+                                        backgroundColor = Orange200
                                     ) {
-                                        Row() {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
                                             Spacer(modifier = Modifier.width(5.dp))
-                                            Text(text = it.content, fontSize = 30.sp)
+                                            Text(text = it.content, fontSize = 18.sp)
                                             Spacer(modifier = Modifier.width(5.dp))
                                         }
                                     }
@@ -93,7 +104,7 @@ fun ChatScreen(viewModel: ChatViewModel = hiltViewModel()) {
 @Composable
 fun ChatTopBar() {
     CenterAlignedTopAppBar(
-        title = { Text(text = "name", fontSize = 24.sp) },
+        title = { Text(text = "User", fontSize = 24.sp) },
         navigationIcon = {
             IconButton(onClick = { /*TODO*/ }) {
                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
@@ -108,10 +119,11 @@ fun ChatTopBar() {
     )
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ChatInputBox(viewModel: ChatViewModel) {
     val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
     var input by remember { mutableStateOf("") }
     Surface() {
         Row(
@@ -119,16 +131,33 @@ fun ChatInputBox(viewModel: ChatViewModel) {
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            OutlinedTextField(value = input, onValueChange = { input = it })
+            OutlinedTextField(
+                modifier = Modifier.width(300.dp),
+                value = input,
+                onValueChange = { input = it },
+                textStyle = TextStyle(fontSize = 18.sp),
+                trailingIcon = {
+                    IconButton(onClick = {
+                        input = ""
+                        keyboardController?.hide()
+                        focusManager.clearFocus()
+                    }) {
+                        Icon(imageVector = Icons.Default.Close, contentDescription = null)
+                    }
+                },
+                maxLines = 3
+            )
             IconButton(onClick = { /*TODO*/ }) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = null)
             }
             FloatingActionButton(
                 modifier = Modifier.size(46.dp),
                 onClick = {
-                    viewModel.addContent(input)
-                    keyboardController?.hide()
-                    input = ""
+                    if (input != "")
+                        viewModel.addContent(input)
+                        keyboardController?.hide()
+                        focusManager.clearFocus()
+                        input = ""
                 }, shape = RoundedCornerShape(16.dp)
             ) {
                 Text(text = "send")
