@@ -21,8 +21,10 @@ class ChatViewModel @Inject constructor() : ViewModel() {
     private fun initOthers() {
         val others = listOf(
             MessageUiState("other", false),
-            MessageUiState("message", false)
+            MessageUiState("message", false),
+            MessageUiState("messageaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", false)
         )
+        uiState.clear()
         others.forEach {
             uiState.add(it)
         }
